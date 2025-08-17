@@ -21,7 +21,7 @@ cargo build --release
 Edit `tdd-pair.yaml` to pick providers and your test command.
 
 - Provider kinds: `gemini`, `open_ai`, `mock`
-- OpenAI-compatible (DeepSeek, Groq, OpenRouter, GitHub Models, local servers) uses `kind: open_ai` + `base_url` + `api_key_env`
+- OpenAI-compatible (DeepSeek, Perplexity, Groq, OpenRouter, GitHub Models, local servers) uses `kind: open_ai` + `base_url` + `api_key_env`
 - Optional header customization for OpenAI-compatible:
   - `api_key_header`: custom header name (default: `Authorization`)
   - `api_key_prefix`: prefix for header value (default: `"Bearer "`; set to `""` for raw keys)
