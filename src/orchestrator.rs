@@ -15,10 +15,13 @@ pub struct OrchestratorConfig {
     pub test_cmd: String,
     #[serde(default = "default_max_context")]
     pub max_context_bytes: usize,
+    #[serde(default = "default_impl_attempts")]
+    pub implementor_max_attempts: usize,
 }
 
 fn default_test_cmd() -> String { "cargo test --color never".to_string() }
 fn default_max_context() -> usize { 200_000 }
+fn default_impl_attempts() -> usize { 3 }
 
 impl OrchestratorConfig {
     pub fn example() -> Self {
@@ -28,6 +31,7 @@ impl OrchestratorConfig {
             refactorer: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.".into()) },
             test_cmd: default_test_cmd(),
             max_context_bytes: default_max_context(),
+            implementor_max_attempts: default_impl_attempts(),
         }
     }
 }
@@ -72,19 +76,37 @@ impl Orchestrator {
         let patch = self.tester.generate_patch("tester", &context, &tester_instr).await?;
         let touched = workspace::apply_patch(&self.project_root, &patch).await?;
         vcs::commit_paths(&self.project_root, &touched, patch.commit_message.as_deref().unwrap_or("test: add failing test")).await?;
+        let tester_head = vcs::get_head_commit(&self.project_root).await?;
 
         let (ok, out) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
         if ok { warn!("Tester step produced passing tests; proceeding anyway") } else { info!("Tests are red as expected") }
 
         info!("Starting Green (Implementor) step");
-        let context2 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
-        let impl_instr = self.build_implementor_instructions(&out);
-        let patch2 = self.implementor.generate_patch("implementor", &context2, &impl_instr).await?;
-        let touched2 = workspace::apply_patch(&self.project_root, &patch2).await?;
-        vcs::commit_paths(&self.project_root, &touched2, patch2.commit_message.as_deref().unwrap_or("feat: make tests pass")).await?;
+        let mut last_fail_output = out.clone();
+        let mut impl_success = false;
+        for attempt in 1..=self.cfg.implementor_max_attempts {
+            let context2 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
+            let impl_instr = self.build_implementor_instructions(&last_fail_output);
+            let patch2 = self.implementor.generate_patch("implementor", &context2, &impl_instr).await?;
+            let touched2 = workspace::apply_patch(&self.project_root, &patch2).await?;
+            let msg = patch2.commit_message.as_deref().unwrap_or("feat: make tests pass");
+            let msg = &format!("{msg} (attempt {attempt})");
+            vcs::commit_paths(&self.project_root, &touched2, msg).await?;
 
-        let (ok2, out2) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
-        if !ok2 { return Err(anyhow!("Implementor step failed tests. Output:\n{}", out2)); }
+            let (ok2, out2) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
+            if ok2 { impl_success = true; break; }
+            last_fail_output = out2;
+            warn!("Implementor attempt {} failed; retrying if attempts remain", attempt);
+        }
+
+        if !impl_success {
+            warn!("All implementor attempts failed; preserving attempts and resetting to tester commit");
+            let branch_name = format!("attempts/implementor-{}", chrono::Utc::now().format("%Y%m%d%H%M%S"));
+            let _ = vcs::create_branch_at_head(&self.project_root, &branch_name).await; // best effort
+            vcs::reset_hard_to(&self.project_root, &tester_head).await?;
+            // End this cycle here; next cycle will try again from a clean tester state
+            return Ok(());
+        }
         info!("Tests green");
 
         info!("Starting Refactor step");

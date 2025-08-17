@@ -6,6 +6,7 @@ tester:
     api_key_env: PERPLEXITY_API_KEY
   system_prompt: "Add exactly one failing test. Output ONLY JSON LlmPatch."
 
+implementor_max_attempts: 10
 implementor:
   provider:
     kind: open_ai

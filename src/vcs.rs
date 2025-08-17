@@ -43,3 +43,21 @@ pub async fn reset_hard_head_minus_one(project_root: &Path) -> Result<()> {
     if !ok { return Err(anyhow!("git reset failed: {}", out)); }
     Ok(())
 }
+
+pub async fn get_head_commit(project_root: &Path) -> Result<String> {
+    let (ok, out) = run_git(project_root, &["rev-parse", "HEAD"]).await?;
+    if !ok { return Err(anyhow!("git rev-parse HEAD failed: {}", out)); }
+    Ok(out.trim().to_string())
+}
+
+pub async fn reset_hard_to(project_root: &Path, target: &str) -> Result<()> {
+    let (ok, out) = run_git(project_root, &["reset", "--hard", target]).await?;
+    if !ok { return Err(anyhow!("git reset --hard {} failed: {}", target, out)); }
+    Ok(())
+}
+
+pub async fn create_branch_at_head(project_root: &Path, name: &str) -> Result<()> {
+    let (ok, out) = run_git(project_root, &["branch", name]).await?;
+    if !ok { return Err(anyhow!("git branch {} failed: {}", name, out)); }
+    Ok(())
+}
