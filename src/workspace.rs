@@ -18,7 +18,7 @@ pub fn collect_context(project_root: &Path, max_bytes: usize) -> Result<String> 
         let include = rel_s.ends_with(".rs") || rel_s.ends_with("Cargo.toml") || rel_s.starts_with("tests/") || rel_s.starts_with("src/") || rel_s.starts_with("benches/") || rel_s.starts_with("examples/") || rel_s.starts_with("README") || rel_s.ends_with(".md");
         if !include { continue; }
         let Ok(contents) = std::fs::read_to_string(p) else { continue };
-        let header = format!("\n===== FILE: {} =====\n", rel_s);
+        let header = format!("\n===== FILE: {rel_s} =====\n");
         let needed = header.len() + contents.len();
         if total + needed > max_bytes { break; }
         buf.push_str(&header);

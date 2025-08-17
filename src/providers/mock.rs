@@ -15,8 +15,7 @@ impl LlmProvider for MockProvider {
             _ => "// TODO: refactor without changing behavior\n",
         };
         patch.files.push(FileEdit { path: "README.tdd-pair.log".into(), mode: EditMode::Append, content: content.into() });
-        patch.commit_message = Some(format!("chore({}): mock patch", role));
+        patch.commit_message = Some(format!("chore({role}): mock patch"));
         Ok(patch)
     }
 }
-

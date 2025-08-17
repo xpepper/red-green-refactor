@@ -16,7 +16,7 @@ impl OpenAiProvider {
         let client = reqwest::Client::builder().build()?;
         let base = cfg.base_url.clone().unwrap_or_else(|| "https://api.openai.com/v1".to_string());
         let env_key = cfg.api_key_env.clone().unwrap_or_else(|| "OPENAI_API_KEY".to_string());
-        let api_key = std::env::var(&env_key).with_context(|| format!("missing env var {}", env_key))?;
+        let api_key = std::env::var(&env_key).with_context(|| format!("missing env var {env_key}"))?;
         Ok(Self { cfg, client, base, api_key })
     }
 }
@@ -62,7 +62,7 @@ impl LlmProvider for OpenAiProvider {
     async fn generate_patch(&self, role: &str, context: &str, instructions: &str) -> Result<LlmPatch> {
         let url = format!("{}/chat/completions", self.base.trim_end_matches('/'));
         let sys = "You are a code-modifying agent. Respond ONLY with a valid JSON object matching schema LlmPatch { files:[{path, mode: 'rewrite'|'append', content}], commit_message?, notes? }. No prose.";
-        let user = format!("Role: {}\nInstructions:\n{}\n\nProject context (truncated):\n{}", role, instructions, context);
+        let user = format!("Role: {role}\nInstructions:\n{instructions}\n\nProject context (truncated):\n{context}");
         let req = ChatReq { model: &self.cfg.model, messages: vec![ Message{ role: "system", content: sys }, Message{ role: "user", content: &user } ], temperature: 0.2 };
         let resp = self.client.post(&url)
             .header(AUTHORIZATION, format!("Bearer {}", self.api_key))
@@ -71,9 +71,9 @@ impl LlmProvider for OpenAiProvider {
             .send().await?
             .error_for_status()?;
         let body: ChatResp = resp.json().await?;
-        let content = body.choices.get(0).map(|c| c.message.content.as_str()).ok_or_else(|| anyhow!("no choices"))?;
+        let content = body.choices.first().map(|c| c.message.content.as_str()).ok_or_else(|| anyhow!("no choices"))?;
         let json_str = extract_json_object(content).unwrap_or(content);
-        let patch: LlmPatch = serde_json::from_str(json_str).with_context(|| format!("failed to parse model JSON: {}", json_str))?;
+        let patch: LlmPatch = serde_json::from_str(json_str).with_context(|| format!("failed to parse model JSON: {json_str}"))?;
         Ok(patch)
     }
 }

@@ -65,7 +65,7 @@ impl ProviderFactory {
         match cfg.kind {
             ProviderKind::OpenAi => Ok(Box::new(openai::OpenAiProvider::new(cfg.clone())?)),
             ProviderKind::Gemini => Ok(Box::new(gemini::GeminiProvider::new(cfg.clone())?)),
-            ProviderKind::Mock => Ok(Box::new(mock::MockProvider::default())),
+            ProviderKind::Mock => Ok(Box::new(mock::MockProvider)),
         }
     }
 }
