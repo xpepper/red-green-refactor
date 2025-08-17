@@ -62,7 +62,7 @@ impl LlmProvider for OpenAiProvider {
     async fn generate_patch(&self, role: &str, context: &str, instructions: &str) -> Result<LlmPatch> {
         let url = format!("{}/chat/completions", self.base.trim_end_matches('/'));
         let sys = "You are a code-modifying agent. Respond ONLY with a valid JSON object matching schema LlmPatch { files:[{path, mode: 'rewrite'|'append', content}], commit_message?, notes? }. No prose.";
-        let user = format!("Instructions:\n{}\n\nProject context (truncated):\n{}", instructions, context);
+        let user = format!("Role: {}\nInstructions:\n{}\n\nProject context (truncated):\n{}", role, instructions, context);
         let req = ChatReq { model: &self.cfg.model, messages: vec![ Message{ role: "system", content: sys }, Message{ role: "user", content: &user } ], temperature: 0.2 };
         let resp = self.client.post(&url)
             .header(AUTHORIZATION, format!("Bearer {}", self.api_key))
@@ -77,4 +77,3 @@ impl LlmProvider for OpenAiProvider {
         Ok(patch)
     }
 }
-

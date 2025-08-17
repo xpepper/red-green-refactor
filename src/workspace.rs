@@ -1,5 +1,5 @@
 use crate::providers::{EditMode, LlmPatch};
-use anyhow::{anyhow, Context, Result};
+use anyhow::Result;
 use std::path::{Path, PathBuf};
 use tokio::{fs, io::AsyncWriteExt, process::Command};
 use walkdir::WalkDir;
@@ -69,4 +69,3 @@ pub async fn run_tests(project_root: &Path, cmd: &str) -> Result<(bool, String)>
     let ok = output.status.success();
     Ok((ok, text))
 }
-
