@@ -23,6 +23,10 @@ pub struct ProviderConfig {
     pub api_key_env: Option<String>,
     /// Optional organization or project id header
     pub organization: Option<String>,
+    /// Optional custom API key header name (e.g., "api-key" for GitHub Models)
+    pub api_key_header: Option<String>,
+    /// Optional API key prefix value (defaults to "Bearer ", set to "" for raw keys)
+    pub api_key_prefix: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

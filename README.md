@@ -1,6 +1,6 @@
 # tdd-pair
 
-Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implementor, refactorer). Each step applies a JSON patch, runs tests, and commits to git. Works with Gemini and OpenAI-compatible APIs (e.g., DeepSeek); mock mode for offline runs.
+Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implementor, refactorer). Each step applies a JSON patch, runs tests, and commits to git. Works with Gemini and OpenAI-compatible APIs (e.g., DeepSeek, GitHub Models); mock mode for offline runs.
 
 ## Features
 - Three roles with independent models/providers per step
@@ -21,7 +21,10 @@ cargo build --release
 Edit `tdd-pair.yaml` to pick providers and your test command.
 
 - Provider kinds: `gemini`, `open_ai`, `mock`
-- OpenAI-compatible (DeepSeek, Groq, OpenRouter, local servers) uses `kind: open_ai` + `base_url` + `api_key_env`
+- OpenAI-compatible (DeepSeek, Groq, OpenRouter, GitHub Models, local servers) uses `kind: open_ai` + `base_url` + `api_key_env`
+- Optional header customization for OpenAI-compatible:
+  - `api_key_header`: custom header name (default: `Authorization`)
+  - `api_key_prefix`: prefix for header value (default: `"Bearer "`; set to `""` for raw keys)
 - Gemini uses `kind: gemini` + `api_key_env`
 - `test_cmd` runs your suite (any language)
 
@@ -58,6 +61,28 @@ Export keys (adjust to your config):
 export GEMINI_API_KEY=your_gemini_key
 export DEEPSEEK_API_KEY=your_deepseek_key
 ```
+
+### GitHub Models (OpenAI-compatible)
+- Most setups work with standard Bearer auth (defaults):
+```yaml
+provider:
+  kind: open_ai
+  model: gpt-4o-mini
+  base_url: https://models.inference.ai.azure.com/openai
+  api_key_env: GITHUB_TOKEN  # or GITHUB_MODELS_TOKEN
+  # uses defaults: Authorization + "Bearer "
+```
+- If your endpoint expects an `api-key` header without Bearer:
+```yaml
+provider:
+  kind: open_ai
+  model: gpt-4o-mini
+  base_url: https://models.inference.ai.azure.com/openai
+  api_key_env: GITHUB_MODELS_API_KEY
+  api_key_header: api-key
+  api_key_prefix: ""
+```
+Note: Some GitHub-hosted endpoints may require additional headers (e.g., `X-GitHub-Api-Version`). If you need that, open an issue—support can be added easily.
 
 ## Run on a kata
 
@@ -101,7 +126,9 @@ pip install pytest
 
 ## Providers
 - Gemini: `kind: gemini`, set `api_key_env` (e.g., `GEMINI_API_KEY`). Models like `gemini-1.5-pro`.
-- OpenAI-compatible (e.g., DeepSeek): `kind: open_ai`, set `base_url` and `api_key_env` (e.g., `DEEPSEEK_API_KEY`).
+- OpenAI-compatible (e.g., DeepSeek, GitHub Models): `kind: open_ai`, set `base_url` and `api_key_env`. Optional:
+  - `api_key_header` (e.g., `api-key`)
+  - `api_key_prefix` (e.g., `""` for raw keys)
 - Mock: `kind: mock` for offline dry runs (appends to `README.tdd-pair.log`).
 
 ## Notes
@@ -126,4 +153,3 @@ pip install pytest
 # Generate sample config
 ./target/release/tdd-pair init-config --out tdd-pair.yaml
 ```
-

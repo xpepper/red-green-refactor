@@ -1,7 +1,7 @@
 use super::{LlmPatch, LlmProvider, ProviderConfig};
 use anyhow::{anyhow, Context, Result};
 use async_trait::async_trait;
-use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
+use reqwest::header::CONTENT_TYPE;
 use serde::{Deserialize, Serialize};
 
 pub struct OpenAiProvider {
@@ -64,8 +64,14 @@ impl LlmProvider for OpenAiProvider {
         let sys = "You are a code-modifying agent. Respond ONLY with a valid JSON object matching schema LlmPatch { files:[{path, mode: 'rewrite'|'append', content}], commit_message?, notes? }. No prose.";
         let user = format!("Role: {role}\nInstructions:\n{instructions}\n\nProject context (truncated):\n{context}");
         let req = ChatReq { model: &self.cfg.model, messages: vec![ Message{ role: "system", content: sys }, Message{ role: "user", content: &user } ], temperature: 0.2 };
+
+        // Build API key header with optional custom name and prefix
+        let header_name = self.cfg.api_key_header.as_deref().unwrap_or("Authorization");
+        let prefix = self.cfg.api_key_prefix.as_deref().unwrap_or("Bearer ");
+        let header_value = format!("{}{}", prefix, self.api_key);
+
         let resp = self.client.post(&url)
-            .header(AUTHORIZATION, format!("Bearer {}", self.api_key))
+            .header(header_name, header_value)
             .header(CONTENT_TYPE, "application/json")
             .json(&req)
             .send().await?

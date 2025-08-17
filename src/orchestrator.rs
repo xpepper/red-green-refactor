@@ -23,9 +23,9 @@ fn default_max_context() -> usize { 200_000 }
 impl OrchestratorConfig {
     pub fn example() -> Self {
         Self {
-            tester: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None }, system_prompt: Some("You are the Tester. Add a single failing test expressing a new behavior. Only output a JSON LlmPatch.".into()) },
-            implementor: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None }, system_prompt: Some("You are the Implementor. Make tests pass with minimal changes. Only output a JSON LlmPatch.".into()) },
-            refactorer: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None }, system_prompt: Some("You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.".into()) },
+            tester: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Tester. Add a single failing test expressing a new behavior. Only output a JSON LlmPatch.".into()) },
+            implementor: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Implementor. Make tests pass with minimal changes. Only output a JSON LlmPatch.".into()) },
+            refactorer: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.".into()) },
             test_cmd: default_test_cmd(),
             max_context_bytes: default_max_context(),
         }

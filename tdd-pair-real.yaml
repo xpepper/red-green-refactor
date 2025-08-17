@@ -1,0 +1,26 @@
+tester:
+  provider:
+    kind: open_ai
+    model: sonar-pro
+    base_url: https://api.perplexity.ai
+    api_key_env: PERPLEXITY_API_KEY
+  system_prompt: "Add exactly one failing test. Output ONLY JSON LlmPatch."
+
+implementor:
+  provider:
+    kind: open_ai
+    model: sonar-pro
+    base_url: https://api.perplexity.ai
+    api_key_env: PERPLEXITY_API_KEY
+  system_prompt: "Make tests pass with the smallest change. Output ONLY JSON LlmPatch."
+
+refactorer:
+  provider:
+    kind: open_ai
+    model: sonar-pro
+    base_url: https://api.perplexity.ai
+    api_key_env: PERPLEXITY_API_KEY
+  system_prompt: "Refactor without changing behavior. Output ONLY JSON LlmPatch."
+
+test_cmd: "cargo test --color never"
+max_context_bytes: 200000
