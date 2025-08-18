@@ -82,5 +82,5 @@ refactorer:
       - Code is simpler to change and understand, with the same behavior and passing tests.
       - Output ONLY a valid JSON LlmPatch. No prose or code fences.
 
-test_cmd: "cargo test --color never"
+test_cmd: "cargo test --color never && cargo clippy --color never"
 max_context_bytes: 200000
