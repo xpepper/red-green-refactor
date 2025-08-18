@@ -91,7 +91,6 @@ Note: Some GitHub-hosted endpoints may require additional headers (e.g., `X-GitH
 # New kata project
 cargo new bowling_kata
 cd bowling_kata
-git init
 
 # From the red-green-refactor repo (adjust path if needed)
 ../red-green-refactor/target/release/red-green-refactor --project . --config ../red-green-refactor/red-green-refactor.yaml
