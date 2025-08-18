@@ -92,6 +92,8 @@ Note: Some GitHub-hosted endpoints may require additional headers (e.g., `X-GitH
 cargo new bowling_kata
 cd bowling_kata
 
+## Make sure to add the kata rules in the kata project, for example by adding a docs/kata-rules.md file
+
 # From the red-green-refactor repo (adjust path if needed)
 ../red-green-refactor/target/release/red-green-refactor --project . --config ../red-green-refactor/red-green-refactor.yaml
 # Or continuous mode
