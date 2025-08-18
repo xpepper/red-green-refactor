@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "A simple Rust project to demonstrate the red-green-refactor cycle in TDD."
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/xpepper/red-green-refactor"
 
 [[bin]]
 name = "rgr"
