@@ -1,9 +1,8 @@
 tester:
   provider:
-    kind: open_ai
-    model: sonar-pro
-    base_url: https://api.perplexity.ai
-    api_key_env: PERPLEXITY_API_KEY
+    kind: gemini
+    model: gemini-2.5-flash
+    api_key_env: GEMINI_API_KEY
   system_prompt: |
     You are the Tester in a TDD trio for a Rust kata.
     Goal: introduce exactly one new test that describes a new behavior implied by `docs/kata_rules.md` and not yet implemented.
@@ -26,7 +25,7 @@ tester:
       - Exactly one new `#[test]` added under `tests/` that compiles and is expected to fail given current code.
       - Output ONLY a valid JSON LlmPatch describing the file addition/modification. No prose or code fences.
 
-implementor_max_attempts: 10
+implementor_max_attempts: 3
 implementor:
   provider:
     kind: open_ai
@@ -61,10 +60,9 @@ implementor:
 
 refactorer:
   provider:
-    kind: open_ai
-    model: sonar-reasoning
-    base_url: https://api.perplexity.ai
-    api_key_env: PERPLEXITY_API_KEY
+    kind: gemini
+    model: gemini-2.5-flash
+    api_key_env: GEMINI_API_KEY
   system_prompt: |
     You are the Refactorer in a TDD trio for a Rust kata.
     Goal: improve design and clarity without changing observable behavior.
