@@ -11,7 +11,7 @@ mod workspace;
 use orchestrator::{Orchestrator, OrchestratorConfig};
 
 #[derive(Parser, Debug)]
-#[command(name = "tdd-pair", version, about = "Orchestrate TDD with LLM roles: tester, implementor, refactorer.")]
+#[command(name = "red-green-refactor", version, about = "Orchestrate TDD with LLM roles: tester, implementor, refactorer.")]
 struct Cli {
     /// Path to the kata project (a cargo project recommended)
     #[arg(long, default_value = ".")]
@@ -36,7 +36,7 @@ enum Commands {
     /// Run continuously until stopped (Ctrl-C)
     Run,
     /// Initialize a sample config file
-    InitConfig { #[arg(long, default_value = "tdd-pair.yaml")] out: PathBuf },
+    InitConfig { #[arg(long, default_value = "red-green-refactor.yaml")] out: PathBuf },
 }
 
 fn init_tracing(verbosity: u8) {
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
 
     match cli.command.unwrap_or(Commands::RunOnce) {
         Commands::InitConfig { out } => {
-            let path = if out.is_dir() { out.join("tdd-pair.yaml") } else { out };
+            let path = if out.is_dir() { out.join("red-green-refactor.yaml") } else { out };
             let cfg = OrchestratorConfig::example();
             let s = serde_yaml::to_string(&cfg)?;
             std::fs::write(&path, s)?;

@@ -1,0 +1,33 @@
+tester:
+  provider:
+    kind: mock
+    model: mock
+    base_url: null
+    api_key_env: null
+    organization: null
+    api_key_header: null
+    api_key_prefix: null
+  system_prompt: You are the Tester. Add a single failing test expressing a new behavior. Only output a JSON LlmPatch.
+implementor:
+  provider:
+    kind: mock
+    model: mock
+    base_url: null
+    api_key_env: null
+    organization: null
+    api_key_header: null
+    api_key_prefix: null
+  system_prompt: You are the Implementor. Make tests pass with minimal changes. Only output a JSON LlmPatch.
+refactorer:
+  provider:
+    kind: mock
+    model: mock
+    base_url: null
+    api_key_env: null
+    organization: null
+    api_key_header: null
+    api_key_prefix: null
+  system_prompt: You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.
+test_cmd: cargo test --color never
+max_context_bytes: 200000
+implementor_max_attempts: 3

@@ -1,6 +1,8 @@
-# tdd-pair
+# red-green-refactor
 
 Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implementor, refactorer). Each step applies a JSON patch, runs tests, and commits to git. Works with Gemini and OpenAI-compatible APIs (e.g., DeepSeek, GitHub Models); mock mode for offline runs.
+
+Note: If you previously used `tdd-pair`, everything is the same—just use the new binary name. Existing config files like `tdd-pair.yaml` still work when passed via `--config`.
 
 ## Features
 - Three roles with independent models/providers per step
@@ -14,19 +16,17 @@ Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implemen
 # Build
 cargo build --release
 # Create a sample config
-./target/release/tdd-pair init-config --out tdd-pair.yaml
+./target/release/red-green-refactor init-config --out red-green-refactor.yaml
 ```
 
 ## Configure
-Edit `tdd-pair.yaml` to pick providers and your test command.
+Edit your YAML (e.g., `red-green-refactor.yaml`) to pick providers and your test command.
 
 - Provider kinds: `gemini`, `open_ai`, `mock`
 - OpenAI-compatible (DeepSeek, Perplexity, Groq, OpenRouter, GitHub Models, local servers) uses `kind: open_ai` + `base_url` + `api_key_env`
 - Optional header customization for OpenAI-compatible:
   - `api_key_header`: custom header name (default: `Authorization`)
   - `api_key_prefix`: prefix for header value (default: `"Bearer "`; set to `""` for raw keys)
-- Gemini uses `kind: gemini` + `api_key_env`
-- `test_cmd` runs your suite (any language)
 
 Example (Gemini tester/refactorer + DeepSeek implementor):
 ```yaml
@@ -93,14 +93,14 @@ cargo new bowling_kata
 cd bowling_kata
 git init
 
-# From the tdd-pair repo (adjust path if needed)
-../tdd-pair/target/release/tdd-pair --project . --config ../tdd-pair/tdd-pair.yaml
+# From the red-green-refactor repo (adjust path if needed)
+../red-green-refactor/target/release/red-green-refactor --project . --config ../red-green-refactor/red-green-refactor.yaml
 # Or continuous mode
-../tdd-pair/target/release/tdd-pair --project . --config ../tdd-pair/tdd-pair.yaml run
+../red-green-refactor/target/release/red-green-refactor --project . --config ../red-green-refactor/red-green-refactor.yaml run
 ```
 What happens each cycle:
 - Tester adds one failing test and commits
-- Implementor makes tests pass and commits
+- Implementor makes tests pass and commits (up to configurable retries)
 - Refactorer improves code and commits; if tests fail, that commit is automatically reverted
 
 Inspect:
@@ -117,11 +117,11 @@ python3 -m venv .venv
 . .venv/bin/activate
 pip install pytest
 
-# Edit tdd-pair.yaml to use pytest
+# Edit your YAML to use pytest
 # test_cmd: "pytest -q"
 
-# Run tdd-pair
-../tdd-pair/target/release/tdd-pair --project . --config ../tdd-pair/tdd-pair.yaml
+# Run red-green-refactor
+../red-green-refactor/target/release/red-green-refactor --project . --config ../red-green-refactor/red-green-refactor.yaml
 ```
 
 ## Providers
@@ -129,13 +129,14 @@ pip install pytest
 - OpenAI-compatible (e.g., DeepSeek, GitHub Models): `kind: open_ai`, set `base_url` and `api_key_env`. Optional:
   - `api_key_header` (e.g., `api-key`)
   - `api_key_prefix` (e.g., `""` for raw keys)
-- Mock: `kind: mock` for offline dry runs (appends to `README.tdd-pair.log`).
+- Mock: `kind: mock` for offline dry runs (appends to `README.red-green-refactor.log`).
 
 ## Notes
 - Context is collected from `src/**`, `tests/**`, `Cargo.toml`, README and Markdown files, truncated at `max_context_bytes`.
 - Each role must output only a JSON `LlmPatch`:
   - `files`: list of edits `{ path, mode: "rewrite"|"append", content }`
   - `commit_message` (optional)
+- Implementor retries: set `implementor_max_attempts` (default 3). On exhaustion, the tool branches `attempts/implementor-...` and resets to the tester commit.
 - Git repo is auto-initialized; refactor commit is reverted if tests break.
 
 ## Troubleshooting
@@ -147,9 +148,9 @@ pip install pytest
 ## Commands
 ```bash
 # One cycle (default)
-./target/release/tdd-pair --project <path> --config tdd-pair.yaml
+./target/release/red-green-refactor --project <path> --config red-green-refactor.yaml
 # Continuous
-./target/release/tdd-pair --project <path> --config tdd-pair.yaml run
+./target/release/red-green-refactor --project <path> --config red-green-refactor.yaml run
 # Generate sample config
-./target/release/tdd-pair init-config --out tdd-pair.yaml
+./target/release/red-green-refactor init-config --out red-green-refactor.yaml
 ```
