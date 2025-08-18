@@ -62,7 +62,7 @@ implementor:
 refactorer:
   provider:
     kind: open_ai
-    model: sonar-pro
+    model: sonar-reasoning
     base_url: https://api.perplexity.ai
     api_key_env: PERPLEXITY_API_KEY
   system_prompt: |
