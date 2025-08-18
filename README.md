@@ -129,7 +129,7 @@ pip install pytest
 - OpenAI-compatible (e.g., DeepSeek, GitHub Models): `kind: open_ai`, set `base_url` and `api_key_env`. Optional:
   - `api_key_header` (e.g., `api-key`)
   - `api_key_prefix` (e.g., `""` for raw keys)
-- Mock: `kind: mock` for offline dry runs (appends to `README.red-green-refactor.log`).
+- Mock: `kind: mock` for offline dry runs (appends to `red-green-refactor-mock.log`).
 
 ## Notes
 - Context is collected from `src/**`, `tests/**`, `Cargo.toml`, README and Markdown files, truncated at `max_context_bytes`.

@@ -14,7 +14,7 @@ impl LlmProvider for MockProvider {
             "implementor" => "// TODO: implement feature to make tests pass\n",
             _ => "// TODO: refactor without changing behavior\n",
         };
-        patch.files.push(FileEdit { path: "README.red-green-refactor.log".into(), mode: EditMode::Append, content: content.into() });
+        patch.files.push(FileEdit { path: "red-green-refactor-mock.log".into(), mode: EditMode::Append, content: content.into() });
         patch.commit_message = Some(format!("chore({role}): mock patch"));
         Ok(patch)
     }
