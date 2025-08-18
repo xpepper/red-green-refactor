@@ -2,6 +2,12 @@
 name = "red-green-refactor"
 version = "0.1.0"
 edition = "2024"
+description = "A simple Rust project to demonstrate the red-green-refactor cycle in TDD."
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "rgr"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"
