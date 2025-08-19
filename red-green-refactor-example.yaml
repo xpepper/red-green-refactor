@@ -61,9 +61,10 @@ implementor:
 
 refactorer:
   provider:
-    kind: gemini
-    model: gemini-2.5-flash
-    api_key_env: GEMINI_API_KEY
+    kind: open_ai
+    model: deepseek-chat
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
   system_prompt: |
     You are the Refactorer in a TDD trio for a Rust kata.
     Goal: improve design and clarity without changing observable behavior.

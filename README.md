@@ -40,8 +40,8 @@ tester:
 implementor:
   provider:
     kind: open_ai
-    model: deepseek-coder
-    base_url: https://api.deepseek.com/v1
+    model: deepseek-chat
+    base_url: https://api.deepseek.com
     api_key_env: DEEPSEEK_API_KEY
   system_prompt: "Make tests pass with the smallest change. Output ONLY JSON LlmPatch."
 
@@ -127,10 +127,15 @@ pip install pytest
 
 ## Providers
 - Gemini: `kind: gemini`, set `api_key_env` (e.g., `GEMINI_API_KEY`). Models like `gemini-1.5-pro`.
-- OpenAI-compatible (e.g., DeepSeek, GitHub Models): `kind: open_ai`, set `base_url` and `api_key_env`. Optional:
+- OpenAI-compatible (e.g., DeepSeek, GitHub Models, Perplexity): `kind: open_ai`, set `base_url` and `api_key_env`. Optional:
   - `api_key_header` (e.g., `api-key`)
   - `api_key_prefix` (e.g., `""` for raw keys)
 - Mock: `kind: mock` for offline dry runs (appends to `red-green-refactor-mock.log`).
+
+### Some provider endpoints (without the /chat/completions suffix, which is automatically appended):
+- DeepSeek: `https://api.deepseek.com` (available models: `deepseek-chat`, `deepseek-reasoner`)
+- Perplexity: `https://api.perplexity.ai` (some available models: `sonar`, `sonar-pro`, `sonar-reasoning`, full list [here](https://docs.perplexity.ai/api-reference/chat-completions-post))
+- GitHub Models: `https://models.github.ai/inference` (available models [here](https://github.com/marketplace?type=models))
 
 ## Notes
 - Context is collected from `src/**`, `tests/**`, `Cargo.toml`, README and Markdown files, truncated at `max_context_bytes`.
