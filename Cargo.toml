@@ -1,6 +1,6 @@
 [package]
 name = "red-green-refactor"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "A simple Rust project to demonstrate the red-green-refactor cycle in TDD."
 license = "MIT OR Apache-2.0"
