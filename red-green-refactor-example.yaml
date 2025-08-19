@@ -1,8 +1,9 @@
 tester:
   provider:
-    kind: gemini
-    model: gemini-2.5-flash
-    api_key_env: GEMINI_API_KEY
+    kind: open_ai
+    model: gpt-4o-mini
+    base_url: https://models.github.ai/inference
+    api_key_env: GITHUB_TOKEN
   system_prompt: |
     You are the Tester in a TDD trio for a Rust kata.
     Goal: introduce exactly one new test that describes a new behavior implied by `docs/kata_rules.md` and not yet implemented.

@@ -68,7 +68,7 @@ export DEEPSEEK_API_KEY=your_deepseek_key
 provider:
   kind: open_ai
   model: gpt-4o-mini
-  base_url: https://models.inference.ai.azure.com/openai
+  base_url: https://models.github.ai/inference
   api_key_env: GITHUB_TOKEN  # or GITHUB_MODELS_TOKEN
   # uses defaults: Authorization + "Bearer "
 ```
@@ -77,7 +77,7 @@ provider:
 provider:
   kind: open_ai
   model: gpt-4o-mini
-  base_url: https://models.inference.ai.azure.com/openai
+  base_url: https://models.github.ai/inference
   api_key_env: GITHUB_MODELS_API_KEY
   api_key_header: api-key
   api_key_prefix: ""
