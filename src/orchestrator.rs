@@ -192,13 +192,13 @@ impl Orchestrator {
     }
 
     fn build_tester_instructions(&self) -> String {
-        let mut s = String::new();
-        if let Some(sp) = &self.cfg.tester.system_prompt {
-            s.push_str(sp);
-            s.push_str("\n\n");
+        let mut instructions = String::new();
+        if let Some(system_prompt) = &self.cfg.tester.system_prompt {
+            instructions.push_str(system_prompt);
+            instructions.push_str("\n\n");
         }
-        s.push_str("Task: Add exactly one failing unit test (red) for the next small behavior in the kata. Do not modify implementation code. If tests already cover everything, add a tiny new expectation. Output ONLY JSON of schema LlmPatch.");
-        s
+        instructions.push_str("Task: Add exactly one failing unit test (red) for the next small behavior in the kata. Do not modify implementation code. Output ONLY JSON of schema LlmPatch.");
+        instructions
     }
 
     fn build_implementor_instructions(&self, failing_output: &str) -> String {
