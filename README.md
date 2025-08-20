@@ -37,6 +37,8 @@ Edit your YAML (e.g., `red-green-refactor.yaml`) to pick providers and your test
   - `api_key_header`: custom header name (default: `Authorization`)
   - `api_key_prefix`: prefix for header value (default: `"Bearer "`; set to `""` for raw keys)
 
+Important: put your kata's rules in your kata repo at `docs/kata-rules.md` and tell each role to read it in their `system_prompt`. The tool automatically includes Markdown files in the model context.
+
 Example (Gemini tester/refactorer + DeepSeek implementor):
 ```yaml
 tester:
@@ -44,7 +46,7 @@ tester:
     kind: gemini
     model: gemini-1.5-pro
     api_key_env: GEMINI_API_KEY
-  system_prompt: "Add exactly one failing test. Output ONLY JSON LlmPatch."
+  system_prompt: "Read docs/kata-rules.md. Add exactly one failing test per the rules. Output ONLY JSON LlmPatch."
 
 implementor:
   provider:
@@ -52,14 +54,14 @@ implementor:
     model: deepseek-chat
     base_url: https://api.deepseek.com
     api_key_env: DEEPSEEK_API_KEY
-  system_prompt: "Make tests pass with the smallest change. Output ONLY JSON LlmPatch."
+  system_prompt: "Read docs/kata-rules.md. Make tests pass with the smallest change. Output ONLY JSON LlmPatch."
 
 refactorer:
   provider:
     kind: gemini
     model: gemini-1.5-pro
     api_key_env: GEMINI_API_KEY
-  system_prompt: "Refactor without changing behavior. Output ONLY JSON LlmPatch."
+  system_prompt: "Read docs/kata-rules.md. Refactor without changing behavior. Output ONLY JSON LlmPatch."
 
 test_cmd: "cargo test --color never"
 max_context_bytes: 200000

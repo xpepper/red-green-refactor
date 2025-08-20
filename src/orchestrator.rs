@@ -32,9 +32,18 @@ fn default_impl_attempts() -> usize {
 impl OrchestratorConfig {
     pub fn example() -> Self {
         Self {
-            tester: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Tester. Add a single failing test expressing a new behavior. Only output a JSON LlmPatch.".into()) },
-            implementor: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Implementor. Make tests pass with minimal changes. Only output a JSON LlmPatch.".into()) },
-            refactorer: RoleProviderConfig { provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None }, system_prompt: Some("You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.".into()) },
+            tester: RoleProviderConfig {
+                provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None },
+                system_prompt: Some("Read docs/kata-rules.md. You are the Tester. Add a single failing test expressing the next small behavior per the rules. Only output a JSON LlmPatch.".into()),
+            },
+            implementor: RoleProviderConfig {
+                provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None },
+                system_prompt: Some("Read docs/kata-rules.md. You are the Implementor. Make tests pass with minimal changes. Only output a JSON LlmPatch.".into())
+            },
+            refactorer: RoleProviderConfig {
+                provider: crate::providers::ProviderConfig { kind: crate::providers::ProviderKind::Mock, model: "mock".into(), base_url: None, api_key_env: None, organization: None, api_key_header: None, api_key_prefix: None },
+                system_prompt: Some("Read docs/kata-rules.md. You are the Refactorer. Improve code without changing behavior. Keep tests passing. Only output a JSON LlmPatch.".into())
+            },
             test_cmd: default_test_cmd(),
             max_context_bytes: default_max_context(),
             implementor_max_attempts: default_impl_attempts(),
@@ -86,7 +95,10 @@ impl Orchestrator {
     }
 
     pub async fn red_green_refactor_cycle(&mut self) -> Result<()> {
-        info!("Starting Red (Tester) step (model {})", &self.cfg.tester.provider.model);
+        info!(
+            "Starting Red (Tester) step (model {})",
+            &self.cfg.tester.provider.model
+        );
         vcs::ensure_repo(&self.project_root).await?;
 
         let context = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
@@ -114,7 +126,10 @@ impl Orchestrator {
             info!("Tests are red as expected")
         }
 
-        info!("Starting Green (Implementor) step (model {})", &self.cfg.implementor.provider.model);
+        info!(
+            "Starting Green (Implementor) step (model {})",
+            &self.cfg.implementor.provider.model
+        );
         let mut last_fail_output = out.clone();
         let mut impl_success = false;
         for attempt in 1..=self.cfg.implementor_max_attempts {
@@ -160,7 +175,10 @@ impl Orchestrator {
         }
         info!("Tests green");
 
-        info!("Starting Refactor step (model {})", &self.cfg.refactorer.provider.model);
+        info!(
+            "Starting Refactor step (model {})",
+            &self.cfg.refactorer.provider.model
+        );
         let context3 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
         let ref_instr = self.build_refactorer_instructions();
         let patch3 = self
