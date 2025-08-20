@@ -2,8 +2,6 @@
 
 Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implementor, refactorer). Each step applies a JSON patch, runs tests, and commits to git. Works with Gemini and OpenAI-compatible APIs (e.g., DeepSeek, GitHub Models); mock mode for offline runs.
 
-Note: If you previously used `tdd-pair`, everything is the same—just use the new binary name. Existing config files like `tdd-pair.yaml` still work when passed via `--config`.
-
 ## Features
 - Three roles with independent models/providers per step
 - JSON patch protocol for safe file edits
