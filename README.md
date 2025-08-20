@@ -25,7 +25,7 @@ If you prefer to build from source, run:
 ```bash
 cargo build --release
 # Create a sample config
-./target/release/red-green-refactor init-config --out red-green-refactor.yaml
+./target/release/rgr init-config --out red-green-refactor.yaml
 ```
 
 ## Configure
