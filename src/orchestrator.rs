@@ -213,12 +213,12 @@ impl Orchestrator {
     }
 
     fn build_refactorer_instructions(&self) -> String {
-        let mut s = String::new();
-        if let Some(sp) = &self.cfg.refactorer.system_prompt {
-            s.push_str(sp);
-            s.push_str("\n\n");
+        let mut instructions = String::new();
+        if let Some(system_prompt) = &self.cfg.refactorer.system_prompt {
+            instructions.push_str(system_prompt);
+            instructions.push_str("\n\n");
         }
-        s.push_str("Task: Refactor to improve clarity, remove duplication, and prepare for change. Don't change behavior. After edits, all tests must still pass. Keep steps small. Output ONLY JSON (LlmPatch).");
-        s
+        instructions.push_str("Task: Refactor to improve clarity, remove duplication, and prepare for change. Don't change behavior. After edits, all tests must still pass. Keep steps small. Output ONLY JSON (LlmPatch).");
+        instructions
     }
 }
