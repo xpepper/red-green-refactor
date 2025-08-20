@@ -81,3 +81,27 @@ impl ProviderFactory {
         }
     }
 }
+
+// Shared helpers for provider implementations
+pub fn extract_json_object(s: &str) -> Option<&str> {
+    // naive extraction of first top-level JSON object
+    let bytes = s.as_bytes();
+    let mut depth = 0isize;
+    let mut start = None;
+    for (i, &b) in bytes.iter().enumerate() {
+        if b == b'{' {
+            if depth == 0 {
+                start = Some(i);
+            }
+            depth += 1;
+        } else if b == b'}' {
+            depth -= 1;
+            if depth == 0 {
+                if let Some(st) = start {
+                    return Some(&s[st..=i]);
+                }
+            }
+        }
+    }
+    None
+}

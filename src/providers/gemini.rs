@@ -1,4 +1,4 @@
-use super::{LlmPatch, LlmProvider, ProviderConfig};
+use super::{LlmPatch, LlmProvider, ProviderConfig, extract_json_object};
 use anyhow::{Context, Result, anyhow};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -66,28 +66,6 @@ struct CandContent {
 #[derive(Debug, Deserialize)]
 struct CandPart {
     text: Option<String>,
-}
-
-fn extract_json_object(s: &str) -> Option<&str> {
-    let bytes = s.as_bytes();
-    let mut depth = 0isize;
-    let mut start = None;
-    for (i, &b) in bytes.iter().enumerate() {
-        if b == b'{' {
-            if depth == 0 {
-                start = Some(i);
-            }
-            depth += 1;
-        } else if b == b'}' {
-            depth -= 1;
-            if depth == 0 {
-                if let Some(st) = start {
-                    return Some(&s[st..=i]);
-                }
-            }
-        }
-    }
-    None
 }
 
 #[async_trait]
