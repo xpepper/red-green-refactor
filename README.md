@@ -11,7 +11,18 @@ Orchestrate a Red–Green–Refactor loop with three LLM roles (tester, implemen
 
 ## Install
 ```bash
-# Build
+cargo install red-green-refactor
+```
+
+## Create a sample config
+```bash
+rgr init-config --out red-green-refactor.yaml
+```
+
+## Build from source
+If you prefer to build from source, run:
+
+```bash
 cargo build --release
 # Create a sample config
 ./target/release/red-green-refactor init-config --out red-green-refactor.yaml
