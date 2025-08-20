@@ -202,14 +202,14 @@ impl Orchestrator {
     }
 
     fn build_implementor_instructions(&self, failing_output: &str) -> String {
-        let mut s = String::new();
-        if let Some(sp) = &self.cfg.implementor.system_prompt {
-            s.push_str(sp);
-            s.push_str("\n\n");
+        let mut instructions = String::new();
+        if let Some(system_prompt) = &self.cfg.implementor.system_prompt {
+            instructions.push_str(system_prompt);
+            instructions.push_str("\n\n");
         }
-        s.push_str("Task: Make the test suite pass with the simplest change. Keep edits minimal and focused. Use baby steps. Output ONLY JSON (LlmPatch).\n\nTest failures to fix:\n");
-        s.push_str(failing_output);
-        s
+        instructions.push_str("Task: Make the test suite pass with the simplest change. Keep edits minimal and focused. Use baby steps. Output ONLY JSON (LlmPatch).\n\nTest failures to fix:\n");
+        instructions.push_str(failing_output);
+        instructions
     }
 
     fn build_refactorer_instructions(&self) -> String {
