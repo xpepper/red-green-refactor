@@ -1,9 +1,9 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-pub mod openai;
 pub mod gemini;
 pub mod mock;
+pub mod openai;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -48,7 +48,10 @@ pub struct FileEdit {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum EditMode { Rewrite, Append }
+pub enum EditMode {
+    Rewrite,
+    Append,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct LlmPatch {
@@ -59,7 +62,12 @@ pub struct LlmPatch {
 
 #[async_trait::async_trait]
 pub trait LlmProvider: Send + Sync {
-    async fn generate_patch(&self, role: &str, context: &str, instructions: &str) -> Result<LlmPatch>;
+    async fn generate_patch(
+        &self,
+        role: &str,
+        context: &str,
+        instructions: &str,
+    ) -> Result<LlmPatch>;
 }
 
 pub struct ProviderFactory;

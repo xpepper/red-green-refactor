@@ -19,9 +19,15 @@ pub struct OrchestratorConfig {
     pub implementor_max_attempts: usize,
 }
 
-fn default_test_cmd() -> String { "cargo test --color never".to_string() }
-fn default_max_context() -> usize { 200_000 }
-fn default_impl_attempts() -> usize { 3 }
+fn default_test_cmd() -> String {
+    "cargo test --color never".to_string()
+}
+fn default_max_context() -> usize {
+    200_000
+}
+fn default_impl_attempts() -> usize {
+    3
+}
 
 impl OrchestratorConfig {
     pub fn example() -> Self {
@@ -38,7 +44,8 @@ impl OrchestratorConfig {
 
 pub fn load_orchestrator_config(path: Option<&PathBuf>) -> Result<OrchestratorConfig> {
     if let Some(p) = path {
-        let s = std::fs::read_to_string(p).with_context(|| format!("reading config {}", p.display()))?;
+        let s = std::fs::read_to_string(p)
+            .with_context(|| format!("reading config {}", p.display()))?;
         let cfg: OrchestratorConfig = if p.extension().and_then(|e| e.to_str()) == Some("json") {
             serde_json::from_str(&s)?
         } else {
@@ -60,11 +67,22 @@ pub struct Orchestrator {
 
 impl Orchestrator {
     pub async fn new(project_root: PathBuf, cfg: OrchestratorConfig) -> Result<Self> {
-        if !project_root.exists() { return Err(anyhow!("project root does not exist: {}", project_root.display())); }
+        if !project_root.exists() {
+            return Err(anyhow!(
+                "project root does not exist: {}",
+                project_root.display()
+            ));
+        }
         let tester = ProviderFactory::build(&cfg.tester.provider)?;
         let implementor = ProviderFactory::build(&cfg.implementor.provider)?;
         let refactorer = ProviderFactory::build(&cfg.refactorer.provider)?;
-        Ok(Self { project_root, cfg, tester, implementor, refactorer })
+        Ok(Self {
+            project_root,
+            cfg,
+            tester,
+            implementor,
+            refactorer,
+        })
     }
 
     pub async fn red_green_refactor_cycle(&mut self) -> Result<()> {
@@ -73,35 +91,68 @@ impl Orchestrator {
 
         let context = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
         let tester_instr = self.build_tester_instructions();
-        let patch = self.tester.generate_patch("tester", &context, &tester_instr).await?;
+        let patch = self
+            .tester
+            .generate_patch("tester", &context, &tester_instr)
+            .await?;
         let touched = workspace::apply_patch(&self.project_root, &patch).await?;
-        vcs::commit_paths(&self.project_root, &touched, patch.commit_message.as_deref().unwrap_or("test: add failing test")).await?;
+        vcs::commit_paths(
+            &self.project_root,
+            &touched,
+            patch
+                .commit_message
+                .as_deref()
+                .unwrap_or("test: add failing test"),
+        )
+        .await?;
         let tester_head = vcs::get_head_commit(&self.project_root).await?;
 
         let (ok, out) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
-        if ok { warn!("Tester step produced passing tests; proceeding anyway") } else { info!("Tests are red as expected") }
+        if ok {
+            warn!("Tester step produced passing tests; proceeding anyway")
+        } else {
+            info!("Tests are red as expected")
+        }
 
         info!("Starting Green (Implementor) step");
         let mut last_fail_output = out.clone();
         let mut impl_success = false;
         for attempt in 1..=self.cfg.implementor_max_attempts {
-            let context2 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
+            let context2 =
+                workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
             let impl_instr = self.build_implementor_instructions(&last_fail_output);
-            let patch2 = self.implementor.generate_patch("implementor", &context2, &impl_instr).await?;
+            let patch2 = self
+                .implementor
+                .generate_patch("implementor", &context2, &impl_instr)
+                .await?;
             let touched2 = workspace::apply_patch(&self.project_root, &patch2).await?;
-            let msg = patch2.commit_message.as_deref().unwrap_or("feat: make tests pass");
+            let msg = patch2
+                .commit_message
+                .as_deref()
+                .unwrap_or("feat: make tests pass");
             let msg = &format!("{msg} (attempt {attempt})");
             vcs::commit_paths(&self.project_root, &touched2, msg).await?;
 
             let (ok2, out2) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
-            if ok2 { impl_success = true; break; }
+            if ok2 {
+                impl_success = true;
+                break;
+            }
             last_fail_output = out2;
-            warn!("Implementor attempt {} failed; retrying if attempts remain", attempt);
+            warn!(
+                "Implementor attempt {} failed; retrying if attempts remain",
+                attempt
+            );
         }
 
         if !impl_success {
-            warn!("All implementor attempts failed; preserving attempts and resetting to tester commit");
-            let branch_name = format!("attempts/implementor-{}", chrono::Utc::now().format("%Y%m%d%H%M%S"));
+            warn!(
+                "All implementor attempts failed; preserving attempts and resetting to tester commit"
+            );
+            let branch_name = format!(
+                "attempts/implementor-{}",
+                chrono::Utc::now().format("%Y%m%d%H%M%S")
+            );
             let _ = vcs::create_branch_at_head(&self.project_root, &branch_name).await; // best effort
             vcs::reset_hard_to(&self.project_root, &tester_head).await?;
             // End this cycle here; next cycle will try again from a clean tester state
@@ -112,15 +163,29 @@ impl Orchestrator {
         info!("Starting Refactor step");
         let context3 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
         let ref_instr = self.build_refactorer_instructions();
-        let patch3 = self.refactorer.generate_patch("refactorer", &context3, &ref_instr).await?;
+        let patch3 = self
+            .refactorer
+            .generate_patch("refactorer", &context3, &ref_instr)
+            .await?;
         let touched3 = workspace::apply_patch(&self.project_root, &patch3).await?;
-        vcs::commit_paths(&self.project_root, &touched3, patch3.commit_message.as_deref().unwrap_or("refactor: improve design")).await?;
+        vcs::commit_paths(
+            &self.project_root,
+            &touched3,
+            patch3
+                .commit_message
+                .as_deref()
+                .unwrap_or("refactor: improve design"),
+        )
+        .await?;
 
         let (ok3, out3) = workspace::run_tests(&self.project_root, &self.cfg.test_cmd).await?;
         if !ok3 {
             warn!("Refactor step broke tests, reverting commit");
             vcs::reset_hard_head_minus_one(&self.project_root).await?;
-            return Err(anyhow!("Refactor step failed tests and was reverted. Output:\n{}", out3));
+            return Err(anyhow!(
+                "Refactor step failed tests and was reverted. Output:\n{}",
+                out3
+            ));
         }
         info!("Refactor preserved green");
         Ok(())
@@ -128,14 +193,20 @@ impl Orchestrator {
 
     fn build_tester_instructions(&self) -> String {
         let mut s = String::new();
-        if let Some(sp) = &self.cfg.tester.system_prompt { s.push_str(sp); s.push_str("\n\n"); }
+        if let Some(sp) = &self.cfg.tester.system_prompt {
+            s.push_str(sp);
+            s.push_str("\n\n");
+        }
         s.push_str("Task: Add exactly one failing unit test (red) for the next small behavior in the kata. Do not modify implementation code. If tests already cover everything, add a tiny new expectation. Output ONLY JSON of schema LlmPatch.");
         s
     }
 
     fn build_implementor_instructions(&self, failing_output: &str) -> String {
         let mut s = String::new();
-        if let Some(sp) = &self.cfg.implementor.system_prompt { s.push_str(sp); s.push_str("\n\n"); }
+        if let Some(sp) = &self.cfg.implementor.system_prompt {
+            s.push_str(sp);
+            s.push_str("\n\n");
+        }
         s.push_str("Task: Make the test suite pass with the simplest change. Keep edits minimal and focused. Use baby steps. Output ONLY JSON (LlmPatch).\n\nTest failures to fix:\n");
         s.push_str(failing_output);
         s
@@ -143,7 +214,10 @@ impl Orchestrator {
 
     fn build_refactorer_instructions(&self) -> String {
         let mut s = String::new();
-        if let Some(sp) = &self.cfg.refactorer.system_prompt { s.push_str(sp); s.push_str("\n\n"); }
+        if let Some(sp) = &self.cfg.refactorer.system_prompt {
+            s.push_str(sp);
+            s.push_str("\n\n");
+        }
         s.push_str("Task: Refactor to improve clarity, remove duplication, and prepare for change. Don't change behavior. After edits, all tests must still pass. Keep steps small. Output ONLY JSON (LlmPatch).");
         s
     }
