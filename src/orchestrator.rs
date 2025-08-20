@@ -86,7 +86,7 @@ impl Orchestrator {
     }
 
     pub async fn red_green_refactor_cycle(&mut self) -> Result<()> {
-        info!("Starting Red (Tester) step");
+        info!("Starting Red (Tester) step (model {})", &self.cfg.tester.provider.model);
         vcs::ensure_repo(&self.project_root).await?;
 
         let context = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
@@ -114,7 +114,7 @@ impl Orchestrator {
             info!("Tests are red as expected")
         }
 
-        info!("Starting Green (Implementor) step");
+        info!("Starting Green (Implementor) step (model {})", &self.cfg.implementor.provider.model);
         let mut last_fail_output = out.clone();
         let mut impl_success = false;
         for attempt in 1..=self.cfg.implementor_max_attempts {
@@ -160,7 +160,7 @@ impl Orchestrator {
         }
         info!("Tests green");
 
-        info!("Starting Refactor step");
+        info!("Starting Refactor step (model {})", &self.cfg.refactorer.provider.model);
         let context3 = workspace::collect_context(&self.project_root, self.cfg.max_context_bytes)?;
         let ref_instr = self.build_refactorer_instructions();
         let patch3 = self
