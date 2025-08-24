@@ -96,10 +96,10 @@ pub fn extract_json_object(s: &str) -> Option<&str> {
             depth += 1;
         } else if b == b'}' {
             depth -= 1;
-            if depth == 0 {
-                if let Some(st) = start {
-                    return Some(&s[st..=i]);
-                }
+            if depth == 0
+                && let Some(st) = start
+            {
+                return Some(&s[st..=i]);
             }
         }
     }
